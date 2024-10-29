@@ -1,6 +1,9 @@
+ARG PHP_MINOR_VERSION=8.2
 # Use Debian Bookworm as the base image
-FROM php:8.2-fpm-bookworm AS builder
-ARG PHP_VERSION=8.2.25
+FROM php:${PHP_MINOR_VERSION}-fpm-bookworm AS builder
+ARG PHP_MINOR_VERSION=8.2
+ARG PATCH_VERSION=25
+ARG PHP_VERSION=${PHP_MINOR_VERSION}.${PATCH_VERSION}
 
 # Set build argument for PHP version with a default value
 # Set environment variable to avoid interactive prompts during package installation
@@ -83,8 +86,7 @@ RUN ./configure \
 # Create directories for PHP-FPM
 RUN mkdir -p /var/run/php /var/log/php-fpm
 
-FROM php:8.2-fpm-bookworm
-ARG PHP_VERSION=8.2.25
+FROM php:${PHP_MINOR_VERSION}-fpm-bookworm
 
 # Install necessary libraries for PHP extensions
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -92,6 +94,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     default-mysql-client \
     libxslt1.1 \
     zip unzip libzip-dev \
+    # The GNU debugger for segfaults
+    gdb \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy PHP binaries and libraries from the builder

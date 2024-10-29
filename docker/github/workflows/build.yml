@@ -1,0 +1,49 @@
+name: "Build and push Docker Image"
+
+on:
+  workflow_dispatch:
+    inputs:
+      php_version:
+        description: "Choose a PHP version"
+        default: "8.2"
+        required: true
+      patch_version:
+        description: "Choose a PHP patch version"
+        default: "25"
+        required: true
+jobs:
+  build_php_fpm:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    strategy:
+      matrix:
+        variant:
+          - bookworm
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PAT }}
+
+      - name: Build and push - ${{ matrix.variant }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          build-args: |
+            PHP_VERSION=${{ github.event.inputs.php_version }}
+            PATCH_VERSION=${{ github.event.inputs.patch_version }}
+          tags: |
+            phillarmonic/php-fpm-debug-flags:${{ github.event.inputs.php_version }}${{ github.event.inputs.patch_version }}-${{ matrix.variant }}
