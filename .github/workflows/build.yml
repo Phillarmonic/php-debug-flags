@@ -46,4 +46,4 @@ jobs:
             PHP_MINOR_VERSION=${{ github.event.inputs.php_version }}
             PATCH_VERSION=${{ github.event.inputs.patch_version }}
           tags: |
-            phillarmonic/php-fpm-debug-flags:${{ github.event.inputs.php_version }}${{ github.event.inputs.patch_version }}-${{ matrix.variant }}
+            phillarmonic/php-fpm-debug-flags:${{ github.event.inputs.php_version }}.${{ github.event.inputs.patch_version }}-${{ matrix.variant }}
